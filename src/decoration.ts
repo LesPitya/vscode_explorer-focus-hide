@@ -7,7 +7,7 @@ export class DecorationProvider implements vscode.FileDecorationProvider {
     readonly onDidChangeFileDecorations: vscode.Event<vscode.Uri | undefined> = this._onDidChangeFileDecorations.event;
 
     constructor(private state: StateManager) {
-        this.state.onDidChangeDecorations((uri) => {
+        this.state.onDidChangeDecorations((uri: vscode.Uri | undefined) => {
             this._onDidChangeFileDecorations.fire(uri);
         });
     }

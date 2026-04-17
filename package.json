@@ -1,19 +1,21 @@
 {
   "name": "explorer-focus-hide",
   "displayName": "Explorer Focus & Hide",
-  "description": "Hide or Focus specific files in the explorer with toggle controls. Inspired by 'Workspace' by Fooxly.",
-  "version": "1.0.0",
-  "publisher": "d3Ex22",
-  "author": "d3Ex22",
+  "description": "Hide or Focus specific files in the explorer with toggle controls.",
+  "version": "1.1.0",
+  "publisher": "LesPitya",
+  "author": "LesPitya",
   "license": "MIT",
-  "homepage": "https://github.com/d3Ex22/vscode_explorer-focus-hide",
+  "homepage": "https://github.com/LesPitya/vscode_explorer-focus-hide",
   "repository": {
     "type": "git",
-    "url": "https://github.com/d3Ex22/vscode_explorer-focus-hide.git"
+    "url": "https://github.com/LesPitya/vscode_explorer-focus-hide.git"
   },
   "bugs": {
-    "url": "https://github.com/d3Ex22/vscode_explorer-focus-hide/issues"
+    "url": "https://github.com/LesPitya/vscode_explorer-focus-hide/issues"
   },
+  "originalAuthor": "d3Ex22",
+  "originalRepository": "https://github.com/d3Ex22/vscode_explorer-focus-hide",
   "keywords": [
     "explorer",
     "focus",
@@ -87,6 +89,11 @@
           "command": "explorer-focus-hide.resetItem",
           "group": "7_modification@3",
           "title": "Reset Item (Clear)"
+        },
+        {
+          "command": "explorer-focus-hide.cycleItemState",
+          "group": "7_modification@4",
+          "title": "Switch Hide/Focus/Reset"
         }
       ],
       "view/title": [
@@ -109,9 +116,56 @@
           "command": "explorer-focus-hide.disableHideMode",
           "when": "view == workbench.explorer.fileView && explorer-focus-hide.hideMode",
           "group": "navigation@2"
+        },
+        {
+          "command": "explorer-focus-hide.cycleItemState",
+          "title": "Switch Focus/Hide/Reset",
+          "icon": "$(sync)"
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "command": "explorer-focus-hide.toggleFocusItem",
+        "key": "",
+        "when": "explorerViewletVisible && filesExplorerFocus"
+      },
+      {
+        "command": "explorer-focus-hide.toggleHideItem",
+        "key": "",
+        "when": "explorerViewletVisible && filesExplorerFocus"
+      },
+      {
+        "command": "explorer-focus-hide.resetItem",
+        "key": "",
+        "when": "explorerViewletVisible && filesExplorerFocus"
+      },
+      {
+        "command": "explorer-focus-hide.enableFocusMode",
+        "key": "",
+        "when": "explorerViewletVisible"
+      },
+      {
+        "command": "explorer-focus-hide.disableFocusMode",
+        "key": "",
+        "when": "explorerViewletVisible"
+      },
+      {
+        "command": "explorer-focus-hide.enableHideMode",
+        "key": "",
+        "when": "explorerViewletVisible"
+      },
+      {
+        "command": "explorer-focus-hide.disableHideMode",
+        "key": "",
+        "when": "explorerViewletVisible"
+      },
+      {
+        "command": "explorer-focus-hide.cycleItemState",
+        "key": "",
+        "when": "explorerViewletVisible && filesExplorerFocus"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

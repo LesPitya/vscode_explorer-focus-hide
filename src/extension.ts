@@ -11,19 +11,42 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.registerFileDecorationProvider(decorationProvider),
         
         // Item Toggles
-        vscode.commands.registerCommand('explorer-focus-hide.toggleHideItem', async (uri: vscode.Uri) => {
-            if (uri) {
+        vscode.commands.registerCommand('explorer-focus-hide.toggleHideItem', async (arg?: vscode.Uri) => {
+            let uris = await StateManager.getSelectedResourceUris();
+            if (uris.length === 0 && arg) {
+                uris = [arg];
+            }
+            for (const uri of uris) {
                 await stateManager.toggleHideItem(uri.fsPath);
             }
         }),
-        vscode.commands.registerCommand('explorer-focus-hide.toggleFocusItem', async (uri: vscode.Uri) => {
-            if (uri) {
+        vscode.commands.registerCommand('explorer-focus-hide.toggleFocusItem', async (arg?: vscode.Uri) => {
+            let uris = await StateManager.getSelectedResourceUris();
+            if (uris.length === 0 && arg) {
+                uris = [arg];
+            }
+            for (const uri of uris) {
                 await stateManager.toggleFocusItem(uri.fsPath);
             }
         }),
-        vscode.commands.registerCommand('explorer-focus-hide.resetItem', async (uri: vscode.Uri) => {
-            if (uri) {
+        vscode.commands.registerCommand('explorer-focus-hide.resetItem', async (arg?: vscode.Uri) => {
+            let uris = await StateManager.getSelectedResourceUris();
+            if (uris.length === 0 && arg) {
+                uris = [arg];
+            }
+            for (const uri of uris) {
                 await stateManager.resetItem(uri.fsPath);
+            }
+        }),
+
+        // Cycle state (Hide -> Focus -> None -> Hide)
+        vscode.commands.registerCommand('explorer-focus-hide.cycleItemState', async (arg?: vscode.Uri) => {
+            let uris = await StateManager.getSelectedResourceUris();
+            if (uris.length === 0 && arg) {
+                uris = [arg];
+            }
+            for (const uri of uris) {
+                await stateManager.cycleItemState(uri.fsPath);
             }
         }),
 

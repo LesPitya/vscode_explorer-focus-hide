@@ -40,12 +40,12 @@ export class StateManager {
     async toggleHideItem(fsPath: string) {
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fsPath));
         if (!workspaceFolder) return;
-        
+
         const relPath = path.relative(workspaceFolder.uri.fsPath, fsPath);
         let hiddenItems = this.getHiddenItems();
         let focusedItems = this.getFocusedItems();
         let changed = false;
-        
+
         if (hiddenItems.includes(relPath)) {
             hiddenItems = hiddenItems.filter(i => i !== relPath);
             changed = true;
@@ -57,7 +57,7 @@ export class StateManager {
                 focusedItems = focusedItems.filter(i => i !== relPath);
             }
         }
-        
+
         if (changed) {
             await this.context.workspaceState.update('hiddenItems', hiddenItems);
             await this.context.workspaceState.update('focusedItems', focusedItems);
@@ -93,7 +93,7 @@ export class StateManager {
         if (changed) {
             await this.context.workspaceState.update('focusedItems', focusedItems);
             await this.context.workspaceState.update('hiddenItems', hiddenItems);
-            
+
             if (this.focusMode || this.hideMode) {
                 await this.updateExclusions();
             }
@@ -140,7 +140,7 @@ export class StateManager {
     private async calculateFocusExclusions(root: vscode.WorkspaceFolder, focusedItems: string[]): Promise<string[]> {
         const keepTree = new Set<string>();
         keepTree.add('.'); // Root
-        
+
         for (const item of focusedItems) {
             const parts = item.split('/');
             let current = '';
@@ -152,14 +152,14 @@ export class StateManager {
 
         const toExclude: string[] = [];
         const keepList = Array.from(keepTree);
-        
+
         for (const keepPath of keepList) {
             if (focusedItems.includes(keepPath)) {
                 continue;
             }
-            
+
             const fullPath = keepPath === '.' ? root.uri.fsPath : path.join(root.uri.fsPath, keepPath);
-            
+
             try {
                 const stat = await vscode.workspace.fs.stat(vscode.Uri.file(fullPath));
                 if ((stat.type & vscode.FileType.Directory) !== 0) {
@@ -175,7 +175,7 @@ export class StateManager {
                 // Path might not exist (deleted?), ignore
             }
         }
-        
+
         return toExclude;
     }
 
@@ -183,7 +183,7 @@ export class StateManager {
         const config = vscode.workspace.getConfiguration('files');
         const currentExclusions = config.inspect('exclude')?.workspaceValue || {};
         const newExclusions: Record<string, boolean> = { ...(currentExclusions as Record<string, boolean>) };
-        
+
         const hiddenItems = this.getHiddenItems();
         const focusedItems = this.getFocusedItems();
 
@@ -218,22 +218,22 @@ export class StateManager {
             // If Hide Mode is ALSO ON
             if (this.hideMode) {
                 for (const hidden of hiddenItems) {
-                     // If a folder is hidden but is a parent of a focused item, 
-                     // we must NOT hide it, otherwise the child won't be visible.
-                     if (this.isParentOfAnyFocus(hidden, focusedItems)) {
-                         continue;
-                     }
-                     newExclusions[hidden] = true;
-                     keysWeSet.push(hidden);
+                    // If a folder is hidden but is a parent of a focused item, 
+                    // we must NOT hide it, otherwise the child won't be visible.
+                    if (this.isParentOfAnyFocus(hidden, focusedItems)) {
+                        continue;
+                    }
+                    newExclusions[hidden] = true;
+                    keysWeSet.push(hidden);
                 }
             }
-        } 
+        }
         // If Focus Mode is OFF (Pure Hide Mode)
         else if (this.hideMode) {
-             for (const item of hiddenItems) {
-                 newExclusions[item] = true;
-                 keysWeSet.push(item);
-             }
+            for (const item of hiddenItems) {
+                newExclusions[item] = true;
+                keysWeSet.push(item);
+            }
         }
 
         await this.context.workspaceState.update('managedExclusions', keysWeSet);
@@ -247,5 +247,36 @@ export class StateManager {
             }
         }
         return false;
+    }
+
+    static async getSelectedResourceUris(): Promise<vscode.Uri[]> {
+        const oldClipboard = await vscode.env.clipboard.readText();
+        await vscode.commands.executeCommand('copyFilePath');
+        const paths = (await vscode.env.clipboard.readText()).trim();
+        await vscode.env.clipboard.writeText(oldClipboard);
+        if (!paths) {
+            return [];
+        }
+        return paths.split(/\r?\n/).map((p: string) => vscode.Uri.file(p.trim()));
+    }
+    async cycleItemState(fsPath: string): Promise<void> {
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fsPath));
+        if (!workspaceFolder) return;
+
+        const relPath = path.relative(workspaceFolder.uri.fsPath, fsPath);
+        const focusedItems = this.getFocusedItems();
+        const hiddenItems = this.getHiddenItems();
+
+        const isFocused = focusedItems.includes(relPath);
+        const isHidden = hiddenItems.includes(relPath);
+
+        if (isFocused) {
+            await this.toggleHideItem(fsPath);
+            await this.toggleFocusItem(fsPath);
+        } else if (isHidden) {
+            await this.resetItem(fsPath);
+        } else {
+            await this.toggleHideItem(fsPath);
+        }
     }
 }
