@@ -259,6 +259,7 @@ export class StateManager {
         }
         return paths.split(/\r?\n/).map((p: string) => vscode.Uri.file(p.trim()));
     }
+    
     async cycleItemState(fsPath: string): Promise<void> {
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fsPath));
         if (!workspaceFolder) return;

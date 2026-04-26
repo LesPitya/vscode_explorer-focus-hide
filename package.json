@@ -2,7 +2,7 @@
   "name": "explorer-focus-hide",
   "displayName": "Explorer Focus & Hide",
   "description": "Hide or Focus specific files in the explorer with toggle controls.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "LesPitya",
   "author": "LesPitya",
   "license": "MIT",

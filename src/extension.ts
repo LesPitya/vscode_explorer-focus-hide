@@ -6,48 +6,37 @@ export function activate(context: vscode.ExtensionContext) {
     const stateManager = new StateManager(context);
     const decorationProvider = new DecorationProvider(stateManager);
 
+    // Helper to get URIs from selection or arg
+    const getUris = async (arg?: vscode.Uri): Promise<vscode.Uri[]> => {
+        let uris = await StateManager.getSelectedResourceUris();
+        if (uris.length === 0 && arg) {
+            uris = [arg];
+        }
+        return uris;
+    };
+
     context.subscriptions.push(
         decorationProvider, // Ensure internal event emitter is disposed
         vscode.window.registerFileDecorationProvider(decorationProvider),
         
         // Item Toggles
         vscode.commands.registerCommand('explorer-focus-hide.toggleHideItem', async (arg?: vscode.Uri) => {
-            let uris = await StateManager.getSelectedResourceUris();
-            if (uris.length === 0 && arg) {
-                uris = [arg];
-            }
-            for (const uri of uris) {
-                await stateManager.toggleHideItem(uri.fsPath);
-            }
+            const uris = await getUris(arg);
+            await Promise.all(uris.map(uri => stateManager.toggleHideItem(uri.fsPath)));
         }),
         vscode.commands.registerCommand('explorer-focus-hide.toggleFocusItem', async (arg?: vscode.Uri) => {
-            let uris = await StateManager.getSelectedResourceUris();
-            if (uris.length === 0 && arg) {
-                uris = [arg];
-            }
-            for (const uri of uris) {
-                await stateManager.toggleFocusItem(uri.fsPath);
-            }
+            const uris = await getUris(arg);
+            await Promise.all(uris.map(uri => stateManager.toggleFocusItem(uri.fsPath)));
         }),
         vscode.commands.registerCommand('explorer-focus-hide.resetItem', async (arg?: vscode.Uri) => {
-            let uris = await StateManager.getSelectedResourceUris();
-            if (uris.length === 0 && arg) {
-                uris = [arg];
-            }
-            for (const uri of uris) {
-                await stateManager.resetItem(uri.fsPath);
-            }
+            const uris = await getUris(arg);
+            await Promise.all(uris.map(uri => stateManager.resetItem(uri.fsPath)));
         }),
 
         // Cycle state (Hide -> Focus -> None -> Hide)
         vscode.commands.registerCommand('explorer-focus-hide.cycleItemState', async (arg?: vscode.Uri) => {
-            let uris = await StateManager.getSelectedResourceUris();
-            if (uris.length === 0 && arg) {
-                uris = [arg];
-            }
-            for (const uri of uris) {
-                await stateManager.cycleItemState(uri.fsPath);
-            }
+            const uris = await getUris(arg);
+            await Promise.all(uris.map(uri => stateManager.cycleItemState(uri.fsPath)));
         }),
 
         // Mode Toggles
